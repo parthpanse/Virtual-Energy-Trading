@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import List, Dict, Tuple
 from fastapi import HTTPException
 
-from ..models.bid import Bid, BidStatus
+from ..models.bid import Bid, BidStatus, BidType
 from ..models.contract import Contract, ContractStatus
 from ..models.market_data import MarketData, MarketDataType
 
@@ -28,8 +28,8 @@ class ClearingService:
             return {"message": "No pending bids to clear", "contracts_created": 0}
         
         # Separate buy and sell bids
-        buy_bids = [bid for bid in pending_bids if bid.bid_type == "BUY"]
-        sell_bids = [bid for bid in pending_bids if bid.bid_type == "SELL"]
+        buy_bids = [bid for bid in pending_bids if bid.bid_type == BidType.BUY]
+        sell_bids = [bid for bid in pending_bids if bid.bid_type == BidType.SELL]
         
         # Sort bids by price (buy bids descending, sell bids ascending)
         buy_bids.sort(key=lambda x: x.price, reverse=True)
@@ -62,7 +62,7 @@ class ClearingService:
                         contract_type="BUY",
                         quantity=trade_quantity,
                         execution_price=execution_price,
-                        execution_date=target_date,
+                        execution_date=datetime.combine(target_date, datetime.min.time()),
                         status=ContractStatus.ACTIVE
                     )
                     
@@ -73,7 +73,7 @@ class ClearingService:
                         contract_type="SELL",
                         quantity=trade_quantity,
                         execution_price=execution_price,
-                        execution_date=target_date,
+                        execution_date=datetime.combine(target_date, datetime.min.time()),
                         status=ContractStatus.ACTIVE
                     )
                     
@@ -117,8 +117,15 @@ class ClearingService:
     
     def get_clearing_summary(self, target_date: date) -> Dict:
         """Get a summary of market clearing results"""
+        # Convert date to datetime for comparison
+        start_datetime = datetime.combine(target_date, datetime.min.time())
+        end_datetime = datetime.combine(target_date, datetime.max.time())
+        
         contracts = self.db.exec(
-            select(Contract).where(Contract.execution_date == target_date)
+            select(Contract).where(
+                Contract.execution_date >= start_datetime,
+                Contract.execution_date <= end_datetime
+            )
         ).all()
         
         if not contracts:

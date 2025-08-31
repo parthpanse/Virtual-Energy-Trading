@@ -21,7 +21,7 @@ class BidResponse(BaseModel):
     """Schema for bid responses"""
     id: str
     hour: int
-    type: BidType
+    bid_type: BidType  # Changed from 'type' to 'bid_type' to match model
     quantity: Decimal
     price: Decimal
     user_id: str

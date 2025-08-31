@@ -5,7 +5,7 @@ import uvicorn
 
 from app.database import create_db_and_tables
 from app.models import Bid
-from app.api import bidding_router, clearing_router, pnl_router, market_data_router
+from app.api import bidding_router, clearing_router, pnl_router, market_data_router, contracts_router
 
 app = FastAPI(
     title="Virtual Energy Trading Platform API",
@@ -32,6 +32,7 @@ app.include_router(bidding_router)
 app.include_router(clearing_router)
 app.include_router(pnl_router)
 app.include_router(market_data_router)
+app.include_router(contracts_router)
 
 @app.get("/")
 async def root():

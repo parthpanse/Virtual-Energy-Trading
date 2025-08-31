@@ -6,7 +6,7 @@ This document provides a comprehensive guide for reviewers to test and evaluate 
 
 The Virtual Energy Trading Platform is designed to simulate real-world energy trading operations. This guide will help reviewers understand the system's functionality and verify that all core features work as expected.
 
-**Current Status**: Backend is 95% complete with full API implementation, Frontend is 40% complete with basic UI structure.
+**Current Status**: Backend is 95% complete with full API implementation and working end-to-end workflow, Frontend is 40% complete with basic UI structure ready for API integration.
 
 ## 🚀 Getting Started
 
@@ -33,6 +33,31 @@ The Virtual Energy Trading Platform is designed to simulate real-world energy tr
    - API Documentation: http://localhost:8000/docs
 
 ## 🧪 Testing Checklist
+
+### 🚀 Quick Testing with Scripts
+
+The project includes several test scripts for quick validation:
+
+#### Complete Workflow Test
+```bash
+# Run the complete end-to-end workflow
+./test_complete_workflow.sh
+```
+This script tests the full trading cycle: market data → bids → clearing → contracts → PnL.
+
+#### Basic Workflow Test
+```bash
+# Run basic workflow test
+./test_workflow.sh
+```
+This script tests core functionality with basic bid creation and clearing.
+
+#### Balanced Workflow Test
+```bash
+# Run balanced workflow test
+./test_balanced_workflow.sh
+```
+This script creates balanced BUY/SELL bids for comprehensive testing.
 
 ### Phase 1: Basic System Health ✅
 
@@ -64,7 +89,16 @@ The Virtual Energy Trading Platform is designed to simulate real-world energy tr
 
 ### Phase 2: Core Functionality Testing ✅
 
-#### 2.1 Dashboard Navigation
+#### 2.1 Backend API Testing
+- [x] **Test Steps**:
+  1. Create test bids using curl commands
+  2. Clear the market to execute contracts
+  3. Complete contracts to trigger PnL calculation
+  4. View PnL summaries and results
+- [x] **Expected Behavior**: Complete end-to-end workflow functions
+- [x] **Success Criteria**: Bids → Contracts → PnL calculation works
+
+#### 2.2 Frontend Navigation
 - [x] **Test Steps**:
   1. Navigate to Dashboard
   2. Click on Bidding in sidebar
@@ -98,6 +132,40 @@ The Virtual Energy Trading Platform is designed to simulate real-world energy tr
 #### 2.4 PnL Analysis
 - [x] **Test Steps**:
   1. Navigate to PnL page
+  2. Verify page structure and layout
+  3. Check placeholder components
+- [x] **Expected Behavior**: 
+  - PnL page displays with proper layout
+  - Ready for data integration
+- [x] **Success Criteria**: Page structure complete
+
+### Phase 3: Complete Backend Workflow Testing ✅
+
+#### 3.1 End-to-End Trading Workflow
+- [x] **Test Steps**:
+  1. Generate market data (day-ahead and real-time prices)
+  2. Create BUY/SELL bids for different users
+  3. Clear the market to execute contracts
+  4. Complete contracts to trigger PnL calculation
+  5. View PnL summaries with realized values
+- [x] **Expected Behavior**: 
+  - Complete workflow from bid creation to PnL calculation
+  - Accurate PnL values based on price differences
+  - Contract status management (ACTIVE → COMPLETED)
+- [x] **Success Criteria**: Full trading cycle works end-to-end
+
+#### 3.2 PnL Calculation Accuracy
+- [x] **Test Steps**:
+  1. Create balanced BUY/SELL bids
+  2. Execute market clearing
+  3. Complete contracts
+  4. Calculate PnL
+  5. Verify PnL values match expected calculations
+- [x] **Expected Behavior**: 
+  - PnL = (Real-time - Day-ahead) × Quantity for BUY contracts
+  - PnL = (Day-ahead - Real-time) × Quantity for SELL contracts
+  - Realized PnL shows actual profit/loss values
+- [x] **Success Criteria**: PnL calculations are mathematically accurate
   2. Review page structure and layout
   3. Check statistics placeholders
 - [x] **Expected Behavior**: 

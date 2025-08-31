@@ -17,11 +17,16 @@ class PnLService:
     def calculate_pnl(self, user_id: str, target_date: date) -> List[PnLRecord]:
         """Calculate PnL for a user on a specific date"""
         # Get all active contracts for the user on the target date
+        # Convert date to datetime range for comparison
+        start_datetime = datetime.combine(target_date, datetime.min.time())
+        end_datetime = datetime.combine(target_date, datetime.max.time())
+        
         contracts = self.db.exec(
             select(Contract).where(
                 Contract.user_id == user_id,
-                Contract.execution_date == target_date,
-                Contract.status == ContractStatus.ACTIVE
+                Contract.execution_date >= start_datetime,
+                Contract.execution_date <= end_datetime,
+                Contract.status.in_([ContractStatus.ACTIVE, ContractStatus.COMPLETED])
             )
         ).all()
         
@@ -31,13 +36,25 @@ class PnLService:
         pnl_records = []
         
         for contract in contracts:
-            # Get day-ahead price (contract execution price)
-            day_ahead_price = contract.execution_price
+            # Get day-ahead price from market data
+            day_ahead_data = self.db.exec(
+                select(MarketData).where(
+                    MarketData.trade_date == target_date,
+                    MarketData.hour == contract.hour,
+                    MarketData.data_type == MarketDataType.DAY_AHEAD
+                )
+            ).first()
+            
+            if not day_ahead_data:
+                # If no day-ahead data, skip this contract
+                continue
+            
+            day_ahead_price = day_ahead_data.price
             
             # Get real-time price for the same hour
             real_time_data = self.db.exec(
                 select(MarketData).where(
-                    MarketData.date == target_date,
+                    MarketData.trade_date == target_date,
                     MarketData.hour == contract.hour,
                     MarketData.data_type == MarketDataType.REAL_TIME
                 )
@@ -85,9 +102,13 @@ class PnLService:
         query = select(PnLRecord).where(PnLRecord.user_id == user_id)
         
         if start_date:
-            query = query.where(PnLRecord.date >= start_date)
+            # Convert date to datetime for comparison
+            start_datetime = datetime.combine(start_date, datetime.min.time())
+            query = query.where(PnLRecord.date >= start_datetime)
         if end_date:
-            query = query.where(PnLRecord.date <= end_date)
+            # Convert date to datetime for comparison
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+            query = query.where(PnLRecord.date <= end_datetime)
         
         query = query.order_by(PnLRecord.date.desc(), PnLRecord.hour)
         

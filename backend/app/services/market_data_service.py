@@ -17,7 +17,7 @@ class MarketDataService:
         # Check if data already exists for this date and type
         existing_data = self.db.exec(
             select(MarketData).where(
-                MarketData.date == target_date,
+                MarketData.trade_date == target_date,
                 MarketData.data_type == data_type
             )
         ).all()
@@ -44,7 +44,7 @@ class MarketDataService:
             
             # Create market data record
             data_record = MarketData(
-                date=target_date,
+                trade_date=target_date,
                 hour=hour,
                 data_type=data_type,
                 price=price,
@@ -63,7 +63,7 @@ class MarketDataService:
     
     def get_market_prices(self, target_date: date, data_type: Optional[MarketDataType] = None) -> List[MarketData]:
         """Get market prices for a specific date"""
-        query = select(MarketData).where(MarketData.date == target_date)
+        query = select(MarketData).where(MarketData.trade_date == target_date)
         
         if data_type:
             query = query.where(MarketData.data_type == data_type)
@@ -76,7 +76,7 @@ class MarketDataService:
         """Get market price for a specific hour and date"""
         return self.db.exec(
             select(MarketData).where(
-                MarketData.date == target_date,
+                MarketData.trade_date == target_date,
                 MarketData.hour == hour,
                 MarketData.data_type == data_type
             )
@@ -87,7 +87,7 @@ class MarketDataService:
         # Get existing real-time data for the date
         existing_data = self.db.exec(
             select(MarketData).where(
-                MarketData.date == target_date,
+                MarketData.trade_date == target_date,
                 MarketData.data_type == MarketDataType.REAL_TIME
             )
         ).all()

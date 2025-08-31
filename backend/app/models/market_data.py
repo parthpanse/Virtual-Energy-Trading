@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 from enum import Enum
@@ -14,7 +14,7 @@ class MarketData(SQLModel, table=True):
     """Market data model for energy prices"""
     
     id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    date: datetime = Field(..., description="Date of the market data")
+    trade_date: date = Field(..., description="Date of the market data")
     hour: int = Field(..., ge=0, le=23, description="Hour of the day (0-23)")
     data_type: MarketDataType = Field(..., description="Type of market data")
     price: Decimal = Field(..., gt=0, description="Price per MWh")
@@ -31,7 +31,7 @@ class MarketData(SQLModel, table=True):
     
     def __str__(self):
         """String representation of the market data"""
-        return f"MarketData(date={self.date}, hour={self.hour}, type={self.data_type}, price={self.price})"
+        return f"MarketData(date={self.trade_date}, hour={self.hour}, type={self.data_type}, price={self.price})"
     
     def __repr__(self):
         """Detailed representation of the market data"""
