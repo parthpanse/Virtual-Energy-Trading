@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timezone
 import uvicorn
+
+from app.database import create_db_and_tables
+from app.models import Bid
+from app.api import bidding_router, clearing_router, pnl_router, market_data_router
 
 app = FastAPI(
     title="Virtual Energy Trading Platform API",
@@ -18,6 +22,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup"""
+    create_db_and_tables()
+
+# Include API routers
+app.include_router(bidding_router)
+app.include_router(clearing_router)
+app.include_router(pnl_router)
+app.include_router(market_data_router)
+
 @app.get("/")
 async def root():
     return {"message": "Virtual Energy Trading Platform API"}
@@ -26,7 +41,7 @@ async def root():
 async def health_check():
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "Virtual Energy Trading Platform API"
     }
 
