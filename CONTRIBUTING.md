@@ -2,47 +2,88 @@
 
 Thank you for your interest in contributing to the Virtual Energy Trading Platform! This document provides guidelines and information for contributors.
 
-## 🤝 How to Contribute
+## 🎯 Project Overview
 
-### Types of Contributions
+The Virtual Energy Trading Platform is a sophisticated simulation environment for energy trading operations. The project consists of:
 
-We welcome various types of contributions:
+- **Backend**: FastAPI-based REST API with SQLModel database
+- **Frontend**: React + TypeScript application with Arco Design
+- **Infrastructure**: Docker containerization and deployment
 
-- **Bug Reports**: Report bugs and issues you encounter
-- **Feature Requests**: Suggest new features or improvements
-- **Code Contributions**: Submit pull requests with code changes
-- **Documentation**: Improve or expand documentation
-- **Testing**: Help test the platform and report findings
-- **Design**: Contribute to UI/UX improvements
+## 🚀 Getting Started
 
-### Getting Started
+### Prerequisites
 
-1. **Fork the Repository**
-   - Click the "Fork" button on the GitHub repository page
-   - Clone your forked repository to your local machine
+- **Git**: Version control system
+- **Docker & Docker Compose**: Containerization
+- **Python 3.11+**: Backend development
+- **Node.js 18+**: Frontend development
+- **Code Editor**: VS Code, PyCharm, or similar
 
-2. **Set Up Development Environment**
+### Development Setup
+
+1. **Fork and Clone**
    ```bash
-   git clone https://github.com/your-username/Virtual-Energy-Trading.git
+   # Fork the repository on GitHub
+   # Then clone your fork
+   git clone https://github.com/YOUR_USERNAME/Virtual-Energy-Trading.git
    cd Virtual-Energy-Trading
    
-   # Backend setup
+   # Add upstream remote
+   git remote add upstream https://github.com/ORIGINAL_OWNER/Virtual-Energy-Trading.git
+   ```
+
+2. **Start Development Environment**
+   ```bash
+   # Start all services
+   docker-compose up --build
+   
+   # Or start services individually
+   docker-compose up backend
+   docker-compose up frontend
+   ```
+
+3. **Local Development**
+   ```bash
+   # Backend (in one terminal)
    cd backend
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -r requirements.txt
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
    
-   # Frontend setup
-   cd ../frontend
+   # Frontend (in another terminal)
+   cd frontend
    npm install
+   npm run dev
    ```
 
-3. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+## 🏗️ Project Structure
 
-## 📋 Development Guidelines
+```
+Virtual-Energy-Trading/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── api/           # API endpoints
+│   │   ├── models/        # Database models
+│   │   ├── schemas/       # Pydantic schemas
+│   │   ├── services/      # Business logic
+│   │   └── database.py    # Database configuration
+│   ├── main.py            # Application entry point
+│   ├── requirements.txt   # Python dependencies
+│   └── Dockerfile         # Backend container
+├── frontend/               # React frontend
+│   ├── src/
+│   │   ├── components/    # Reusable components
+│   │   ├── pages/         # Page components
+│   │   └── main.tsx       # Entry point
+│   ├── package.json       # Node dependencies
+│   └── Dockerfile         # Frontend container
+├── docker-compose.yml      # Service orchestration
+└── docs/                   # Documentation
+```
+
+## 📝 Development Guidelines
 
 ### Code Style
 
@@ -50,27 +91,27 @@ We welcome various types of contributions:
 - **Formatting**: Use Black for code formatting
 - **Linting**: Use flake8 for linting
 - **Type Hints**: Use type hints for all function parameters and return values
-- **Docstrings**: Follow Google docstring format
+- **Docstrings**: Use Google-style docstrings for all functions and classes
 
 ```python
-def calculate_pnl(da_price: Decimal, rt_price: Decimal, quantity: Decimal) -> Decimal:
-    """Calculate profit and loss for a given contract.
+def calculate_pnl(
+    user_id: str, 
+    target_date: date
+) -> List[PnLRecord]:
+    """Calculate PnL for a user on a specific date.
     
     Args:
-        da_price: Day-ahead market price
-        rt_price: Real-time market price
-        quantity: Contract quantity in MWh
+        user_id: Unique identifier for the user
+        target_date: Date for PnL calculation
         
     Returns:
-        Calculated PnL value
+        List of PnL records for the user and date
         
     Raises:
-        ValueError: If prices or quantity are negative
+        HTTPException: If user_id is invalid
     """
-    if da_price < 0 or rt_price < 0 or quantity < 0:
-        raise ValueError("Prices and quantity must be positive")
-    
-    return (rt_price - da_price) * quantity
+    # Implementation here
+    pass
 ```
 
 #### TypeScript/React (Frontend)
@@ -82,358 +123,275 @@ def calculate_pnl(da_price: Decimal, rt_price: Decimal, quantity: Decimal) -> De
 ```typescript
 interface BidFormProps {
   onSubmit: (bid: BidData) => void;
-  onCancel: () => void;
-  loading?: boolean;
+  isLoading?: boolean;
 }
 
-const BidForm: React.FC<BidFormProps> = ({ onSubmit, onCancel, loading = false }) => {
-  const [form] = Form.useForm();
-  
-  const handleSubmit = (values: BidData) => {
-    onSubmit(values);
-  };
-  
+const BidForm: React.FC<BidFormProps> = ({ onSubmit, isLoading = false }) => {
+  // Component implementation
   return (
-    <Form form={form} onFinish={handleSubmit}>
-      {/* Form fields */}
-    </Form>
+    <form onSubmit={handleSubmit}>
+      {/* Form content */}
+    </form>
   );
 };
 ```
 
-### Testing Requirements
+### Database Guidelines
 
-#### Backend Testing
-- **Coverage**: Aim for >80% test coverage
-- **Unit Tests**: Test individual functions and classes
-- **Integration Tests**: Test API endpoints and database operations
-- **Test Structure**: Use pytest fixtures and parametrized tests
-
-```python
-import pytest
-from decimal import Decimal
-from app.services.pnl_service import calculate_pnl
-
-@pytest.mark.parametrize("da_price,rt_price,quantity,expected", [
-    (Decimal("45.50"), Decimal("47.25"), Decimal("100"), Decimal("175.00")),
-    (Decimal("48.75"), Decimal("46.80"), Decimal("50"), Decimal("-97.50")),
-])
-def test_calculate_pnl(da_price, rt_price, quantity, expected):
-    result = calculate_pnl(da_price, rt_price, quantity)
-    assert result == expected
-```
-
-#### Frontend Testing
-- **Component Tests**: Test component rendering and interactions
-- **Integration Tests**: Test page workflows
-- **Accessibility**: Ensure components meet accessibility standards
-- **Test Structure**: Use React Testing Library
-
-```typescript
-import { render, screen, fireEvent } from '@testing-library/react';
-import BidForm from '../BidForm';
-
-describe('BidForm', () => {
-  it('should submit form with valid data', () => {
-    const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
-    
-    render(<BidForm onSubmit={mockSubmit} onCancel={mockCancel} />);
-    
-    fireEvent.change(screen.getByLabelText('Hour'), { target: { value: '14' } });
-    fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '100' } });
-    fireEvent.click(screen.getByText('Submit'));
-    
-    expect(mockSubmit).toHaveBeenCalledWith({
-      hour: 14,
-      quantity: 100,
-      // other fields...
-    });
-  });
-});
-```
-
-### Database and Models
-
-#### Model Design
-- **Naming**: Use descriptive table and column names
+- **Migrations**: Use Alembic for database migrations
+- **Models**: Extend SQLModel for all database models
 - **Relationships**: Define clear foreign key relationships
-- **Indexes**: Add indexes for frequently queried columns
-- **Constraints**: Use database constraints for data integrity
-
-```python
-class Bid(SQLModel, table=True):
-    __tablename__ = "bids"
-    
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="users.id", index=True)
-    hour: int = Field(ge=0, le=23, index=True)
-    date: date = Field(index=True)
-    type: BidType = Field(index=True)
-    quantity: Decimal = Field(max_digits=10, decimal_places=2)
-    price: Decimal = Field(max_digits=10, decimal_places=2)
-    status: BidStatus = Field(default=BidStatus.PENDING, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    class Config:
-        arbitrary_types_allowed = True
-```
-
-#### Migration Strategy
-- **Version Control**: Track database schema changes
-- **Backward Compatibility**: Ensure migrations are reversible
-- **Testing**: Test migrations on sample data
+- **Indexes**: Add appropriate database indexes for performance
 
 ### API Design
 
-#### Endpoint Structure
-- **RESTful**: Follow REST principles
-- **Versioning**: Use URL versioning (e.g., `/api/v1/bids`)
-- **Error Handling**: Return consistent error responses
-- **Validation**: Validate all input data
+- **RESTful**: Follow REST principles for API design
+- **Status Codes**: Use appropriate HTTP status codes
+- **Error Handling**: Provide clear error messages and codes
+- **Validation**: Use Pydantic for request/response validation
 
-```python
-@router.post("/bids", response_model=BidResponse, status_code=201)
-async def create_bid(
-    bid: BidCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-) -> BidResponse:
-    """Create a new bid for energy trading."""
-    try:
-        # Validate business rules
-        await validate_bid_rules(bid, current_user, db)
-        
-        # Create bid
-        db_bid = Bid.from_orm(bid)
-        db_bid.user_id = current_user.id
-        db.add(db_bid)
-        db.commit()
-        db.refresh(db_bid)
-        
-        return BidResponse.from_orm(db_bid)
-        
-    except ValidationError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error creating bid: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+### Testing
+
+#### Backend Testing
+```bash
+cd backend
+pytest                    # Run all tests
+pytest -v               # Verbose output
+pytest -k "test_name"   # Run specific test
+pytest --cov=app        # With coverage
 ```
 
-#### Response Format
-```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "hour": 14,
-    "type": "BUY",
-    "quantity": "100.00",
-    "price": "45.50"
-  },
-  "message": "Bid created successfully"
-}
+#### Frontend Testing
+```bash
+cd frontend
+npm test                 # Run all tests
+npm test -- --watch     # Watch mode
+npm test -- --coverage  # With coverage
 ```
 
-## 🚀 Pull Request Process
+### Testing Standards
+- **Unit Tests**: Test individual functions and methods
+- **Integration Tests**: Test API endpoints and database operations
+- **Coverage**: Maintain >80% code coverage
+- **Mocking**: Use appropriate mocking for external dependencies
 
-### Before Submitting
+## 🔄 Development Workflow
 
-1. **Ensure Code Quality**
-   - Run all tests: `pytest` (backend) and `npm test` (frontend)
-   - Check code formatting: `black .` (backend) and `npm run lint` (frontend)
-   - Verify no linting errors
+### 1. Create Feature Branch
+```bash
+# Update your fork
+git fetch upstream
+git checkout main
+git merge upstream/main
 
-2. **Update Documentation**
-   - Update README.md if adding new features
-   - Add docstrings for new functions
-   - Update API documentation if changing endpoints
-
-3. **Test Your Changes**
-   - Test locally with Docker: `docker-compose up --build`
-   - Verify all functionality works as expected
-   - Test edge cases and error conditions
-
-### Pull Request Template
-
-```markdown
-## Description
-Brief description of changes and why they're needed.
-
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-
-## Testing
-- [ ] Backend tests pass
-- [ ] Frontend tests pass
-- [ ] Manual testing completed
-- [ ] Edge cases tested
-
-## Checklist
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Documentation updated
-- [ ] No console errors
-- [ ] Responsive design tested
-
-## Screenshots (if applicable)
-Add screenshots for UI changes.
-
-## Additional Notes
-Any additional information or context.
+# Create feature branch
+git checkout -b feature/your-feature-name
 ```
 
-### Review Process
+### 2. Make Changes
+- Write code following the style guidelines
+- Add tests for new functionality
+- Update documentation as needed
+- Ensure all tests pass
 
-1. **Code Review**
-   - At least one maintainer must approve
-   - Address all review comments
-   - Ensure CI/CD checks pass
+### 3. Commit Changes
+```bash
+# Stage changes
+git add .
 
-2. **Merge Requirements**
-   - All tests must pass
-   - No merge conflicts
-   - Documentation updated
-   - Code review approved
+# Commit with descriptive message
+git commit -m "feat: add real-time price updates
 
-## 🐛 Bug Reports
-
-### Bug Report Template
-
-```markdown
-## Bug Description
-Clear description of the bug.
-
-## Steps to Reproduce
-1. Go to '...'
-2. Click on '...'
-3. See error
-
-## Expected Behavior
-What should happen.
-
-## Actual Behavior
-What actually happens.
-
-## Environment
-- OS: [e.g., Windows 10, macOS 12.0]
-- Browser: [e.g., Chrome 96, Firefox 95]
-- Version: [e.g., 1.0.0]
-
-## Additional Context
-Any other context, logs, or screenshots.
+- Implement WebSocket connection for live prices
+- Add price change notifications
+- Update dashboard with real-time data
+- Add tests for WebSocket functionality"
 ```
 
-## 💡 Feature Requests
+#### Commit Message Format
+Use conventional commits format:
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation changes
+- `style:` Code style changes
+- `refactor:` Code refactoring
+- `test:` Test additions/changes
+- `chore:` Maintenance tasks
 
-### Feature Request Template
-
-```markdown
-## Feature Description
-Clear description of the requested feature.
-
-## Problem Statement
-What problem does this feature solve?
-
-## Proposed Solution
-How should this feature work?
-
-## Alternatives Considered
-What other approaches were considered?
-
-## Additional Context
-Any other context or examples.
+### 4. Push and Create PR
+```bash
+git push origin feature/your-feature-name
 ```
+
+Then create a Pull Request on GitHub with:
+- Clear description of changes
+- Screenshots for UI changes
+- Test coverage information
+- Any breaking changes noted
+
+## 🧪 Testing Guidelines
+
+### Backend Testing
+- **Unit Tests**: Test individual service methods
+- **API Tests**: Test endpoint functionality
+- **Database Tests**: Test model operations
+- **Integration Tests**: Test service interactions
+
+### Frontend Testing
+- **Component Tests**: Test React components
+- **Hook Tests**: Test custom hooks
+- **Integration Tests**: Test page functionality
+- **E2E Tests**: Test complete user workflows
+
+### Test Data
+- Use factories for creating test data
+- Clean up test data after each test
+- Use realistic but minimal test data
+- Mock external services appropriately
 
 ## 📚 Documentation
 
-### Documentation Standards
+### Code Documentation
+- Document all public APIs and functions
+- Include usage examples in docstrings
+- Keep README files up to date
+- Document configuration options
 
-- **Clarity**: Write clear, concise documentation
-- **Examples**: Include code examples and use cases
-- **Structure**: Use consistent formatting and organization
-- **Updates**: Keep documentation current with code changes
+### API Documentation
+- Use FastAPI's automatic documentation
+- Add detailed descriptions for endpoints
+- Include request/response examples
+- Document error codes and messages
 
-### Documentation Types
+### User Documentation
+- Provide setup instructions
+- Include usage examples
+- Document configuration options
+- Add troubleshooting guides
 
-1. **Code Documentation**: Inline comments and docstrings
-2. **API Documentation**: Endpoint descriptions and examples
-3. **User Guides**: How-to guides for end users
-4. **Developer Guides**: Setup and contribution instructions
+## 🚀 Deployment
 
-## 🏷️ Version Control
+### Development
+```bash
+# Start development environment
+docker-compose up --build
 
-### Commit Message Format
+# View logs
+docker-compose logs -f
 
-```
-type(scope): description
-
-[optional body]
-
-[optional footer]
-```
-
-**Types**: feat, fix, docs, style, refactor, test, chore
-**Scope**: backend, frontend, docs, docker, etc.
-
-**Examples**:
-```
-feat(backend): add bid validation service
-fix(frontend): resolve navigation menu collapse issue
-docs(readme): update installation instructions
+# Stop services
+docker-compose down
 ```
 
-### Branch Naming
+### Production
+```bash
+# Build production images
+docker-compose -f docker-compose.prod.yml up --build
 
-- **Feature branches**: `feature/description`
-- **Bug fix branches**: `fix/description`
-- **Documentation branches**: `docs/description`
-- **Release branches**: `release/version`
+# Deploy to production
+docker-compose -f docker-compose.prod.yml up -d
+```
 
-## 🔒 Security
+## 🐛 Issue Reporting
 
-### Security Guidelines
+### Bug Reports
+When reporting bugs, include:
+- Clear description of the problem
+- Steps to reproduce
+- Expected vs actual behavior
+- Environment details (OS, browser, etc.)
+- Screenshots or error logs
 
-- **Input Validation**: Validate all user inputs
-- **Authentication**: Implement proper authentication
-- **Authorization**: Use role-based access control
-- **Data Protection**: Protect sensitive data
-- **Dependencies**: Keep dependencies updated
+### Feature Requests
+For feature requests:
+- Clear description of the feature
+- Use case and benefits
+- Implementation suggestions (if any)
+- Priority level
 
-### Reporting Security Issues
+## 🤝 Code Review Process
 
-If you discover a security vulnerability:
-1. **DO NOT** create a public issue
-2. Email security@example.com
-3. Include detailed description and steps to reproduce
-4. Allow time for response before public disclosure
+### Review Checklist
+- [ ] Code follows style guidelines
+- [ ] Tests are included and passing
+- [ ] Documentation is updated
+- [ ] No breaking changes (or clearly documented)
+- [ ] Performance considerations addressed
+- [ ] Security implications considered
 
-## 📞 Getting Help
+### Review Guidelines
+- Be constructive and respectful
+- Focus on code quality and functionality
+- Suggest improvements when possible
+- Approve only when satisfied with changes
 
-### Communication Channels
+## 📊 Performance Guidelines
 
-- **GitHub Issues**: For bugs and feature requests
-- **GitHub Discussions**: For questions and general discussion
-- **Email**: For security issues or private matters
+### Backend Performance
+- Use database indexes appropriately
+- Implement caching where beneficial
+- Optimize database queries
+- Use async/await for I/O operations
 
-### Resources
+### Frontend Performance
+- Minimize bundle size
+- Use React.memo for expensive components
+- Implement lazy loading where appropriate
+- Optimize re-renders
 
-- [Project README](README.md)
-- [API Documentation](API_DOCS.md)
-- [Engineering Decisions](DECISIONS.md)
-- [Evaluation Guide](EVALUATION.md)
+## 🔒 Security Guidelines
 
-## 🎉 Recognition
+### Backend Security
+- Validate all input data
+- Use parameterized queries
+- Implement proper authentication
+- Sanitize user inputs
+- Use HTTPS in production
+
+### Frontend Security
+- Sanitize user inputs
+- Use Content Security Policy
+- Implement proper CORS
+- Validate data before submission
+
+## 🌟 Recognition
 
 Contributors will be recognized in:
 - Project README
 - Release notes
-- Contributor hall of fame
-- GitHub contributors page
+- Contributor statistics
+- Special acknowledgments for significant contributions
+
+## 📞 Getting Help
+
+### Communication Channels
+- **GitHub Issues**: For bugs and feature requests
+- **GitHub Discussions**: For questions and discussions
+- **Pull Requests**: For code contributions
+
+### Resources
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [React Documentation](https://reactjs.org/docs/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Arco Design Documentation](https://arco.design/react/en-US)
+
+## 📋 Contribution Checklist
+
+Before submitting a contribution:
+
+- [ ] Code follows style guidelines
+- [ ] Tests are written and passing
+- [ ] Documentation is updated
+- [ ] No console errors or warnings
+- [ ] All linting checks pass
+- [ ] Performance impact considered
+- [ ] Security implications reviewed
+- [ ] Breaking changes documented
+
+## 🎉 Thank You!
+
+Thank you for contributing to the Virtual Energy Trading Platform! Your contributions help make this project better for everyone.
 
 ---
 
-Thank you for contributing to the Virtual Energy Trading Platform! Your contributions help make this project better for everyone.
+**Note**: This contributing guide is a living document. Please suggest improvements and updates as the project evolves.
