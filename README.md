@@ -99,6 +99,7 @@ graph TB
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs #Preferred
 
+
 ### Local Development
 
 1. **Backend Setup**
@@ -116,6 +117,10 @@ graph TB
    npm install
    npm run dev
    ```
+
+## 📑 Workflow Guide
+
+For a step-by-step example of how to generate market data, place bids, clear the market, and calculate PnL, check out the [WORKFLOW.md](./WORKFLOW.md) file.
 
 ## 📚 API Documentation
 
