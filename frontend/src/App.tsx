@@ -1,28 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ConfigProvider } from '@arco-design/web-react';
+import './App.css';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Bidding from './pages/Bidding';
 import Orders from './pages/Orders';
 import PnL from './pages/PnL';
-import './App.css';
+import { setApiBaseUrl } from './services/api';
+import { config } from './config';
 
 function App() {
+  useEffect(() => {
+    // Initialize API configuration
+    const apiUrl = config.getApiUrl();
+    console.log('Setting API URL to:', apiUrl);
+    setApiBaseUrl(apiUrl);
+  }, []);
+
   return (
-    <ConfigProvider>
-      <Router>
+    <Router>
+      <div className="App">
         <Layout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/bidding" element={<Bidding />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/pnl" element={<PnL />} />
           </Routes>
         </Layout>
-      </Router>
-    </ConfigProvider>
+      </div>
+    </Router>
   );
 }
 

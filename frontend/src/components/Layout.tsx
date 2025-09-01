@@ -1,97 +1,69 @@
 import React, { useState } from 'react';
-import { Layout as ArcoLayout, Menu, Button } from '@arco-design/web-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  IconDashboard,
-  IconGift,
-  IconFile,
-  IconBarChart,
-  IconMenu,
-} from '@arco-design/web-react/icon';
-
-const { Header, Sider, Content } = ArcoLayout;
+import { Link, useLocation } from 'react-router-dom';
+import './Layout.css';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
 
-  const menuItems = [
-    {
-      key: '/dashboard',
-      icon: <IconDashboard />,
-      title: 'Dashboard',
-    },
-    {
-      key: '/bidding',
-      icon: <IconGift />,
-      title: 'Bidding',
-    },
-    {
-      key: '/orders',
-      icon: <IconFile />,
-      title: 'Orders',
-    },
-    {
-      key: '/pnl',
-      icon: <IconBarChart />,
-      title: 'PnL',
-    },
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/bidding', label: 'Bidding', icon: '💰' },
+    { path: '/orders', label: 'Orders', icon: '📋' },
+    { path: '/pnl', label: 'PnL', icon: '📈' },
   ];
 
-  const handleMenuClick = (key: string) => {
-    navigate(key);
-  };
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <ArcoLayout style={{ height: '100vh' }}>
-      <Sider
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        collapsible
-        trigger={null}
-        style={{ background: '#001529' }}
-      >
-        <div style={{ height: 32, margin: 12, background: 'rgba(255, 255, 255, 0.2)' }} />
-        <Menu
-          defaultSelectedKeys={[location.pathname]}
-          style={{ width: '100%', height: 'calc(100% - 48px)' }}
-          theme="dark"
-          mode="inline"
-          onClickMenuItem={handleMenuClick}
-        >
-          {menuItems.map((item) => (
-            <Menu.Item key={item.key} icon={item.icon}>
-              {item.title}
-            </Menu.Item>
+    <div className="layout">
+      {/* Sidebar */}
+      <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          <h2>Energy Trading</h2>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? '◀' : '▶'}
+          </button>
+        </div>
+        
+        <nav className="sidebar-nav">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {sidebarOpen && <span className="nav-label">{item.label}</span>}
+            </Link>
           ))}
-        </Menu>
-      </Sider>
-      <ArcoLayout>
-        <Header style={{ padding: 0, background: '#fff' }}>
-          <Button
-            type="text"
-            icon={collapsed ? <IconMenu /> : <IconMenu />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
-          />
-          <span style={{ fontSize: '18px', fontWeight: 'bold', marginLeft: '16px' }}>
-            Virtual Energy Trading Platform
-          </span>
-        </Header>
-        <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="main-content">
+        <header className="header">
+          <div className="header-content">
+            <h1>Virtual Energy Trading Platform</h1>
+            <div className="header-actions">
+              <span className="market-status">Market: Open</span>
+              <span className="current-time">{new Date().toLocaleTimeString()}</span>
+            </div>
+          </div>
+        </header>
+        
+        <main className="content">
           {children}
-        </Content>
-      </ArcoLayout>
-    </ArcoLayout>
+        </main>
+      </div>
+    </div>
   );
 };
 

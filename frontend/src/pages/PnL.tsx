@@ -1,242 +1,286 @@
-import React from 'react';
-import { Card, Table, Row, Col, Statistic, Tag, Space, Button } from '@arco-design/web-react';
-import { IconDownload, IconBarChart, IconTrendingUp, IconTrendingDown } from '@arco-design/web-react/icon';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { apiService, PnLRecord, PnLSummary } from '../services/api';
+import './PnL.css';
 
-interface PnLRecord {
-  id: string;
-  hour: number;
-  type: 'BUY' | 'SELL';
-  quantity: number;
-  daPrice: number;
-  rtPrice: number;
-  pnl: number;
-  timestamp: string;
+interface PnLData {
+  date: string;
+  total_pnl: number;
+  realized_pnl: number;
+  unrealized_pnl: number;
+  total_volume: number;
+  records_count: number;
+  user_count: number;
+  user_breakdown: Array<{
+    user_id: string;
+    total_pnl: number;
+    realized_pnl: number;
+    unrealized_pnl: number;
+    total_volume: number;
+    records_count: number;
+  }>;
 }
 
 const PnL: React.FC = () => {
-  // Mock data
-  const mockPnL: PnLRecord[] = [
-    {
-      id: '1',
-      hour: 10,
-      type: 'BUY',
-      quantity: 100,
-      daPrice: 45.50,
-      rtPrice: 47.25,
-      pnl: -175.00,
-      timestamp: '2024-01-15'
-    },
-    {
-      id: '2',
-      hour: 14,
-      type: 'SELL',
-      quantity: 50,
-      daPrice: 48.75,
-      rtPrice: 46.80,
-      pnl: 97.50,
-      timestamp: '2024-01-15'
-    },
-    {
-      id: '3',
-      hour: 16,
-      type: 'BUY',
-      quantity: 75,
-      daPrice: 47.25,
-      rtPrice: 48.10,
-      pnl: -63.75,
-      timestamp: '2024-01-15'
-    },
-    {
-      id: '4',
-      hour: 20,
-      type: 'SELL',
-      quantity: 120,
-      daPrice: 49.00,
-      rtPrice: 50.25,
-      pnl: -150.00,
-      timestamp: '2024-01-15'
+  const [pnlData, setPnlData] = useState<PnLData>({ 
+    date: '', 
+    total_pnl: 0, 
+    realized_pnl: 0, 
+    unrealized_pnl: 0, 
+    total_volume: 0, 
+    records_count: 0,
+    user_count: 0,
+    user_breakdown: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const loadPnLData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const summaryResponse = await apiService.getAllUsersPnLSummary(selectedDate);
+      const summary = summaryResponse.data || { 
+        date: selectedDate, 
+        total_pnl: 0, 
+        realized_pnl: 0, 
+        unrealized_pnl: 0, 
+        total_volume: 0, 
+        records_count: 0,
+        user_count: 0,
+        user_breakdown: []
+      };
+
+      setPnlData(summary);
+
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to load PnL data');
+      console.error('PnL data loading error:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, [selectedDate]);
 
-  const columns = [
-    {
-      title: 'Hour',
-      dataIndex: 'hour',
-      key: 'hour',
-      width: 80,
-      render: (hour: number) => `${hour}:00`
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      width: 80,
-      render: (type: string) => (
-        <Tag color={type === 'BUY' ? 'green' : 'red'}>
-          {type}
-        </Tag>
-      )
-    },
-    {
-      title: 'Quantity (MWh)',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      width: 120
-    },
-    {
-      title: 'DA Price ($/MWh)',
-      dataIndex: 'daPrice',
-      key: 'daPrice',
-      width: 140,
-      render: (price: number) => `$${price}`
-    },
-    {
-      title: 'RT Price ($/MWh)',
-      dataIndex: 'rtPrice',
-      key: 'rtPrice',
-      width: 140,
-      render: (price: number) => `$${price}`
-    },
-    {
-      title: 'PnL ($)',
-      dataIndex: 'pnl',
-      key: 'pnl',
-      width: 120,
-      render: (pnl: number) => (
-        <Tag color={pnl >= 0 ? 'green' : 'red'}>
-          {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
-        </Tag>
-      )
-    },
-    {
-      title: 'Date',
-      dataIndex: 'timestamp',
-      key: 'timestamp',
-      width: 120
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 120,
-      render: (_: any, record: PnLRecord) => (
-        <Space>
-          <Button size="small" icon={<IconBarChart />} />
-          <Button size="small" icon={<IconDownload />} />
-        </Space>
-      )
-    }
-  ];
+  useEffect(() => {
+    loadPnLData();
+    const interval = setInterval(loadPnLData, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [loadPnLData]);
 
-  const calculateTotalPnL = () => {
-    return mockPnL.reduce((total, record) => total + record.pnl, 0);
-  };
+  // Since we don't have individual records, create empty chart data
+  const chartData: any[] = [];
+  const priceComparisonData: any[] = [];
 
-  const getPnLBreakdown = () => {
-    const buyPnL = mockPnL
-      .filter(record => record.type === 'BUY')
-      .reduce((total, record) => total + record.pnl, 0);
-    
-    const sellPnL = mockPnL
-      .filter(record => record.type === 'SELL')
-      .reduce((total, record) => total + record.pnl, 0);
-    
-    return { buyPnL, sellPnL };
-  };
-
-  const totalPnL = calculateTotalPnL();
-  const { buyPnL, sellPnL } = getPnLBreakdown();
+  if (loading && pnlData.total_pnl === 0) {
+    return (
+      <div className="pnl">
+        <div className="loading">Loading PnL data...</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2>Profit & Loss (PnL)</h2>
-        <Space>
-          <Button icon={<IconDownload />}>Export Report</Button>
-          <Button type="primary" icon={<IconBarChart />}>Generate Report</Button>
-        </Space>
+    <div className="pnl">
+      <div className="pnl-header">
+        <h2>Profit & Loss Analysis</h2>
+        <div className="date-selector">
+          <label>Date:</label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="date-input"
+          />
+        </div>
       </div>
 
-      {/* PnL Summary */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Total PnL"
-              value={totalPnL}
-              precision={2}
-              prefix="$"
-              valueStyle={{ color: totalPnL >= 0 ? '#3f8600' : '#cf1322' }}
-              prefix={totalPnL >= 0 ? <IconTrendingUp /> : <IconTrendingDown />}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Buy PnL"
-              value={buyPnL}
-              precision={2}
-              prefix="$"
-              valueStyle={{ color: buyPnL >= 0 ? '#3f8600' : '#cf1322' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Sell PnL"
-              value={sellPnL}
-              precision={2}
-              prefix="$"
-              valueStyle={{ color: sellPnL >= 0 ? '#3f8600' : '#cf1322' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Total Contracts"
-              value={mockPnL.length}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      {/* PnL Summary Cards */}
+      <div className="pnl-summary">
+        <div className="summary-card total">
+          <div className="summary-icon">💰</div>
+          <div className="summary-content">
+            <div className={`summary-value ${pnlData.total_pnl >= 0 ? 'positive' : 'negative'}`}>
+              ${pnlData.total_pnl.toFixed(2)}
+            </div>
+            <div className="summary-label">Total PnL</div>
+          </div>
+        </div>
+
+        <div className="summary-card realized">
+          <div className="summary-icon">✅</div>
+          <div className="summary-content">
+            <div className={`summary-value ${pnlData.realized_pnl >= 0 ? 'positive' : 'negative'}`}>
+              ${pnlData.realized_pnl.toFixed(2)}
+            </div>
+            <div className="summary-label">Realized PnL</div>
+          </div>
+        </div>
+
+        <div className="summary-card unrealized">
+          <div className="summary-icon">⏳</div>
+          <div className="summary-content">
+            <div className={`summary-value ${pnlData.unrealized_pnl >= 0 ? 'positive' : 'negative'}`}>
+              ${pnlData.unrealized_pnl.toFixed(2)}
+            </div>
+            <div className="summary-label">Unrealized PnL</div>
+          </div>
+        </div>
+
+        <div className="summary-card quantity">
+          <div className="summary-icon">📊</div>
+          <div className="summary-content">
+            <div className="summary-value">
+              {pnlData.total_volume} MWh
+            </div>
+            <div className="summary-label">Total Quantity</div>
+          </div>
+        </div>
+      </div>
+
+      {/* User Breakdown Section */}
+      {pnlData.user_breakdown.length > 0 && (
+        <div className="user-breakdown-section">
+          <h3>PnL by User ({pnlData.user_count} users)</h3>
+          <div className="user-breakdown-grid">
+            {pnlData.user_breakdown.map((user) => (
+              <div key={user.user_id} className="user-pnl-card">
+                <div className="user-header">
+                  <h4>User: {user.user_id}</h4>
+                  <div className={`user-total-pnl ${user.total_pnl >= 0 ? 'positive' : 'negative'}`}>
+                    ${user.total_pnl.toFixed(2)}
+                  </div>
+                </div>
+                <div className="user-details">
+                  <div className="user-detail">
+                    <span className="label">Realized:</span>
+                    <span className={`value ${user.realized_pnl >= 0 ? 'positive' : 'negative'}`}>
+                      ${user.realized_pnl.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="user-detail">
+                    <span className="label">Unrealized:</span>
+                    <span className={`value ${user.unrealized_pnl >= 0 ? 'positive' : 'negative'}`}>
+                      ${user.unrealized_pnl.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="user-detail">
+                    <span className="label">Volume:</span>
+                    <span className="value">{user.total_volume} MWh</span>
+                  </div>
+                  <div className="user-detail">
+                    <span className="label">Records:</span>
+                    <span className="value">{user.records_count}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Charts Section */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
-          <Card title="RT vs DA Price Comparison">
-            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-              <p>Real-time vs Day-ahead price chart will be displayed here</p>
+      <div className="charts-section">
+        <div className="chart-container">
+          <h3>PnL by Hour</h3>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="hour" 
+                  tickFormatter={(value) => `${value}:00`}
+                />
+                <YAxis />
+                <Tooltip 
+                  labelFormatter={(value) => `Hour: ${value}:00`}
+                  formatter={(value: any, name: string) => [`$${value.toFixed(2)}`, name]}
+                />
+                <Bar dataKey="realized" fill="#4caf50" name="Realized" />
+                <Bar dataKey="unrealized" fill="#ff9800" name="Unrealized" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="chart-placeholder">
+              <p>No PnL data available for selected date</p>
             </div>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="Hourly PnL Distribution">
-            <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-              <p>Hourly PnL distribution chart will be displayed here</p>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+          )}
+        </div>
 
-      {/* PnL Table */}
-      <Card title="Detailed PnL Analysis">
-        <Table
-          columns={columns}
-          data={mockPnL}
-          rowKey="id"
-          pagination={{
-            total: mockPnL.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `Showing ${range[0]}-${range[1]} of ${total} records`
-          }}
-          scroll={{ x: 1000 }}
-        />
-      </Card>
+        <div className="chart-container">
+          <h3>Price Comparison (DA vs RT)</h3>
+          {priceComparisonData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={priceComparisonData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="hour" 
+                  tickFormatter={(value) => `${value}:00`}
+                />
+                <YAxis />
+                <Tooltip 
+                  labelFormatter={(value) => `Hour: ${value}:00`}
+                  formatter={(value: any, name: string) => [`$${value.toFixed(2)}`, name]}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="dayAhead" 
+                  stroke="#667eea" 
+                  strokeWidth={2}
+                  name="Day Ahead"
+                  dot={{ fill: '#667eea', strokeWidth: 2, r: 4 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="realTime" 
+                  stroke="#f44336" 
+                  strokeWidth={2}
+                  name="Real Time"
+                  dot={{ fill: '#f44336', strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="chart-placeholder">
+              <p>No price data available for selected date</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* PnL Details Table */}
+      <div className="pnl-details">
+        <h3>PnL Details</h3>
+        <div className="details-table">
+          <div className="table-header">
+            <div className="header-cell">Hour</div>
+            <div className="header-cell">Quantity (MWh)</div>
+            <div className="header-cell">Day Ahead Price</div>
+            <div className="header-cell">Real Time Price</div>
+            <div className="header-cell">PnL</div>
+            <div className="header-cell">Type</div>
+          </div>
+          
+          {pnlData.records_count === 0 ? (
+            <div className="no-records">
+              <p>No PnL records found for selected date</p>
+            </div>
+          ) : (
+            // This section will need to be updated to display individual records
+            // if the API were to return them. For now, it's empty.
+            <div className="no-records">
+              <p>PnL details are not available in this view.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
