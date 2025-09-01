@@ -23,16 +23,34 @@ graph TB
         I --> J
     end
 
-    subgraph "Data Sources"
-        K[Mock Provider] --> L[Market Data]
-        M[Grid Status Provider] --> L
-    end
 
     A -.-> E
     B -.-> E
     C -.-> E
     D -.-> E
 ```
+
+## 📊 Project Status
+
+### ✅ Completed (95% Backend, 40% Frontend)
+- **Backend API**: All core trading endpoints implemented and tested
+- **Database**: Complete data model with relationships
+- **Business Logic**: Market clearing, PnL calculation, contract management
+- **Documentation**: Comprehensive API docs and project documentation
+- **Docker**: Containerized deployment ready
+
+### ⚠️ In Progress
+- **Frontend Integration**: API connection and data visualization
+- **Real-time Updates**: WebSocket implementation for live data
+- **Testing Suite**: Unit and integration tests
+- **Error Handling**: User-friendly error messages and validation
+
+### 📋 Next Steps
+1. Complete frontend API integration
+2. Add data visualization (charts, graphs)
+3. Implement real-time updates
+4. Add comprehensive testing
+5. Polish user experience
 
 ## ✨ Features
 
@@ -62,8 +80,6 @@ graph TB
 
 ### Prerequisites
 - Docker and Docker Compose
-- Node.js 18+ (for local development)
-- Python 3.11+ (for local development)
 
 ### Using Docker (Recommended)
 
@@ -81,7 +97,7 @@ graph TB
 3. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
+   - API Documentation: http://localhost:8000/docs #Preferred
 
 ### Local Development
 
@@ -101,28 +117,6 @@ graph TB
    npm run dev
    ```
 
-## 📊 Project Status
-
-### ✅ Completed (95% Backend, 40% Frontend)
-- **Backend API**: All core trading endpoints implemented and tested
-- **Database**: Complete data model with relationships
-- **Business Logic**: Market clearing, PnL calculation, contract management
-- **Documentation**: Comprehensive API docs and project documentation
-- **Docker**: Containerized deployment ready
-
-### ⚠️ In Progress
-- **Frontend Integration**: API connection and data visualization
-- **Real-time Updates**: WebSocket implementation for live data
-- **Testing Suite**: Unit and integration tests
-- **Error Handling**: User-friendly error messages and validation
-
-### 📋 Next Steps
-1. Complete frontend API integration
-2. Add data visualization (charts, graphs)
-3. Implement real-time updates
-4. Add comprehensive testing
-5. Polish user experience
-
 ## 📚 API Documentation
 
 #### Health Check
@@ -135,7 +129,7 @@ GET /api/health
 POST /api/bids
 {
   "hour": 10,
-  "type": "BUY",
+  "bid_type": "BUY",
   "quantity": 100,
   "price": 45.50,
   "user_id": "user123"
@@ -154,7 +148,7 @@ GET /api/pnl?date=2024-01-15&user_id=user123
 
 #### Market Data
 ```http
-GET /api/market-data?date=2024-01-15&type=day_ahead
+GET /api/market/prices/?target_date=2025-09-01&data_type=DAY_AHEAD'
 ```
 
 ### Interactive API Docs
@@ -209,17 +203,6 @@ Virtual-Energy-Trading/
 │   │   └── database.py    # Database configuration
 ├── frontend/               # React frontend
 │   ├── src/               # Source code
-│   │   ├── components/    # Reusable components
-│   │   │   └── Layout.tsx     # Main layout component
-│   │   ├── pages/         # Page components
-│   │   │   ├── Dashboard.tsx  # Main dashboard
-│   │   │   ├── Bidding.tsx    # Bidding interface
-│   │   │   ├── Orders.tsx     # Order management
-│   │   │   └── PnL.tsx        # PnL analysis
-│   │   ├── main.tsx       # Entry point
-│   │   └── App.tsx        # Main app component
-│   ├── package.json       # Node dependencies
-│   └── Dockerfile         # Frontend container
 ├── docker-compose.yml      # Service orchestration
 ├── README.md              # This file
 ├── DECISIONS.md           # Engineering decisions
