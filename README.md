@@ -6,7 +6,7 @@ The Virtual Energy Trading Platform is a sophisticated, web-based simulation env
 
 ```mermaid
 graph TB
-    subgraph "Frontend (React + TypeScript + Arco Design)"
+    subgraph "Frontend (React + TypeScript)"
         A[Dashboard] --> B[Bidding Interface]
         A --> C[Orders Management]
         A --> D[PnL Analysis]
@@ -71,7 +71,7 @@ graph TB
 - **PnL Engine**: Accurate profit/loss calculations with realized/unrealized tracking
 
 ### Frontend Features ⚠️
-- **Responsive UI**: Modern interface built with Arco Design components
+- **Responsive UI**: Modern interface built with React
 - **Page Structure**: Dashboard, Bidding, Orders, and PnL pages implemented
 - **Basic Layout**: Navigation and component structure ready
 - **API Integration**: Structure ready, implementation in progress
@@ -229,7 +229,7 @@ Virtual-Energy-Trading/
 ### Phase 1: Setup & Scaffolding ✅
 - [x] Project structure and Git setup
 - [x] FastAPI backend skeleton
-- [x] React frontend with Arco Design
+- [x] React frontend
 - [x] Docker containerization
 - [x] Database models and relationships
 
@@ -258,32 +258,7 @@ Virtual-Energy-Trading/
 - [ ] Performance optimization
 - [ ] Production deployment
 - [ ] CI/CD pipeline
-
-## 🎯 Current Implementation Status
-
-### Backend ✅ (95% Complete)
-- **Database Layer**: Complete with all models and relationships
-- **API Endpoints**: All core endpoints implemented and tested
-- **Business Logic**: Complete services for bidding, clearing, PnL, and market data
-- **Data Validation**: Comprehensive validation and business rules
-- **Error Handling**: Proper HTTP status codes and error messages
-
-### Frontend 🚧 (40% Complete)
-- **Structure**: Complete page routing and layout
-- **Components**: Basic UI components with Arco Design
-- **Data Integration**: Placeholder for API integration
-- **Real-time Features**: Infrastructure ready, implementation pending
-
-### Key Features Implemented
-1. **Bidding System**: Complete with validation, limits, and status management
-2. **Market Clearing**: Automated bid matching and contract creation
-3. **PnL Calculation**: Real-time vs day-ahead price analysis
-4. **Market Data**: Mock price generation with peak/off-peak patterns
-5. **Database**: SQLite with proper relationships and constraints
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- [ ] Comprehensive documentation
 
 ### Development Setup
 1. Fork the repository
@@ -296,12 +271,6 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the GitHub repository
-- Check the [API documentation](http://localhost:8000/docs)
-- Review the [evaluation guide](EVALUATION.md)
 
 ## 🙏 Acknowledgments
 

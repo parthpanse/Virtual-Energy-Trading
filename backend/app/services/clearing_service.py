@@ -24,6 +24,7 @@ class ClearingService:
             )
         ).all()
 
+        #get day ahead price
         da_price = self.db.exec(
             select(MarketData).where(
                 MarketData.trade_date == target_date,
