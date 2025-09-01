@@ -6,23 +6,38 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENVIRONMENT=development
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:///./energy_trading.db
     volumes:
       - ./backend:/app
     networks:
       - energy-trading
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:8000
     depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      backend:
+        condition: service_healthy
     networks:
       - energy-trading
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   energy-trading:

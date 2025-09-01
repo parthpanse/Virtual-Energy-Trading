@@ -107,3 +107,24 @@ async def get_portfolio_pnl(
         return portfolio
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/all-users/summary", status_code=200)
+async def get_all_users_pnl_summary(
+    target_date: str = Query(..., description="Date to get summary for (YYYY-MM-DD)"),
+    db: Session = Depends(get_session)
+):
+    """Get PnL summary for all users on a specific date"""
+    pnl_service = PnLService(db)
+    
+    try:
+        # Parse the date
+        parsed_date = date.fromisoformat(target_date)
+        
+        # Get PnL summary for all users
+        all_users_summary = pnl_service.get_all_users_pnl_summary(parsed_date)
+        
+        return all_users_summary
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

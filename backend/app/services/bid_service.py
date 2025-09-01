@@ -43,7 +43,7 @@ class BidService:
         # Create new bid
         bid = Bid(
             hour=bid_data.hour,
-            bid_type=bid_data.type,  # Map schema 'type' to model 'bid_type'
+            bid_type=bid_data.bid_type,  # Map schema 'bid_type' to model 'bid_type'
             quantity=bid_data.quantity,
             price=bid_data.price,
             user_id=bid_data.user_id

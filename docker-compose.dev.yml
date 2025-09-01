@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=energy_trading.db
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/energy_trading.db
+    networks:
+      - energy-trading
+    restart: unless-stopped
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - energy-trading
+    restart: unless-stopped
+    command: ["npm", "start"]
+
+volumes:
+  backend_data:
+
+networks:
+  energy-trading:
+    driver: bridge

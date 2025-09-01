@@ -7,7 +7,7 @@ from ..models.bid import BidType, BidStatus
 class BidCreate(BaseModel):
     """Schema for creating a new bid"""
     hour: int = Field(..., ge=0, le=23, description="Hour of the day (0-23)")
-    type: BidType = Field(..., description="Type of bid (BUY/SELL)")
+    bid_type: BidType = Field(..., description="Type of bid (BUY/SELL)")
     quantity: Decimal = Field(..., gt=0, description="Quantity in MWh")
     price: Decimal = Field(..., gt=0, description="Price per MWh")
     user_id: str = Field(..., description="User ID who is placing the bid")

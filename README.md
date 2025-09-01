@@ -11,7 +11,7 @@ graph TB
         A --> C[Orders Management]
         A --> D[PnL Analysis]
     end
-    
+
     subgraph "Backend (FastAPI + SQLModel)"
         E[API Layer] --> F[Bidding Service]
         E --> G[Clearing Service]
@@ -22,12 +22,12 @@ graph TB
         H --> J
         I --> J
     end
-    
+
     subgraph "Data Sources"
         K[Mock Provider] --> L[Market Data]
         M[Grid Status Provider] --> L
     end
-    
+
     A -.-> E
     B -.-> E
     C -.-> E
@@ -160,20 +160,6 @@ GET /api/market-data?date=2024-01-15&type=day_ahead
 ### Interactive API Docs
 Visit http://localhost:8000/docs for interactive API documentation powered by Swagger UI.
 
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd backend
-pytest
-```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
 ## 🐳 Docker Commands
 
 ### Development
@@ -189,12 +175,6 @@ docker-compose logs -f
 
 # Stop services
 docker-compose down
-```
-
-### Production Build
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml up --build
 ```
 
 ## 📁 Project Structure
@@ -255,7 +235,7 @@ Virtual-Energy-Trading/
 #### Backend
 - `ENVIRONMENT`: Set to `development` or `production`
 - `DATABASE_URL`: SQLite database path (default: `energy_trading.db`)
-- `MARKET_PROVIDER`: Choose between `mock` or `grid_status`
+- `MARKET_PROVIDER`: Choose `mock`
 
 #### Frontend
 - `REACT_APP_API_URL`: Backend API endpoint
